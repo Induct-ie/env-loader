@@ -12,6 +12,12 @@ jobs:
   build:
     name: Build and Release Binaries (glibc)
     runs-on: ubuntu-latest
+    permissions:
+      # Enable writing to a github release
+      contents: write
+      packages: write
+      id-token: write
+
     strategy:
       matrix:
         target:
