@@ -45,7 +45,6 @@ pub struct Amazon {
     secrets_client: Option<aws_sdk_secretsmanager::Client>,
 }
 
-
 impl Amazon {
     pub fn new() -> Self {
         Self::default()
@@ -136,9 +135,11 @@ async fn main() {
                     // Pass the remainder as the value directly
                     if let Some(prefix) = &application.env_prefix {
                         if key.starts_with(prefix) {
-                            passed_variables.insert(key.strip_prefix(prefix).unwrap().to_string(), remainder.to_string());
-                        }
-                        else{
+                            passed_variables.insert(
+                                key.strip_prefix(prefix).unwrap().to_string(),
+                                remainder.to_string(),
+                            );
+                        } else {
                             passed_variables.insert(key, remainder.to_string());
                         }
                     } else {
@@ -152,9 +153,11 @@ async fn main() {
                         Some(value) => {
                             if let Some(prefix) = &application.env_prefix {
                                 if key.starts_with(prefix) {
-                                    passed_variables.insert(key.strip_prefix(prefix).unwrap().to_string(), value);
-                                }
-                                else{
+                                    passed_variables.insert(
+                                        key.strip_prefix(prefix).unwrap().to_string(),
+                                        value,
+                                    );
+                                } else {
                                     passed_variables.insert(key, value);
                                 }
                             } else {
