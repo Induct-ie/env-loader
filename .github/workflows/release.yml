@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 env:
-  BIN_NAME: envloader
+  BIN_NAME: environment-loader
 
 jobs:
   build:
