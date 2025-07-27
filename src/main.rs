@@ -39,6 +39,7 @@ struct Application {
     pub cmd: Vec<String>,
 }
 
+#[derive(Default)]
 pub struct Amazon {
     config: Option<aws_config::SdkConfig>,
     secrets_client: Option<aws_sdk_secretsmanager::Client>,
@@ -46,16 +47,13 @@ pub struct Amazon {
 
 impl Amazon {
     pub fn new() -> Self {
-        Self {
-            config: None,
-            secrets_client: None,
-        }
+        Self::default()
     }
 
     pub async fn get_config(&mut self) -> &aws_config::SdkConfig {
         let config = &mut self.config;
         if config.is_some() {
-            return config.as_ref().unwrap();
+            config.as_ref().unwrap()
         } else {
             let amazon = aws_config::defaults(aws_config::BehaviorVersion::v2025_01_17())
                 .load()
