@@ -45,6 +45,7 @@ pub struct Amazon {
     secrets_client: Option<aws_sdk_secretsmanager::Client>,
 }
 
+
 impl Amazon {
     pub fn new() -> Self {
         Self::default()
@@ -115,9 +116,9 @@ async fn main() {
         }
     }
 
-    if let Some(prefix) = application.env_prefix {
+    if let Some(prefix) = &application.env_prefix {
         for variable in variables.keys().cloned().collect::<Vec<_>>() {
-            if !variable.starts_with(&prefix) {
+            if !variable.starts_with(prefix) {
                 let value = variables.remove(&variable).unwrap();
                 passed_variables.insert(variable.clone(), value);
             }
@@ -133,14 +134,32 @@ async fn main() {
             match load_method {
                 "value" => {
                     // Pass the remainder as the value directly
-                    passed_variables.insert(key, remainder.to_string());
+                    if let Some(prefix) = &application.env_prefix {
+                        if key.starts_with(prefix) {
+                            passed_variables.insert(key.strip_prefix(prefix).unwrap().to_string(), remainder.to_string());
+                        }
+                        else{
+                            passed_variables.insert(key, remainder.to_string());
+                        }
+                    } else {
+                        passed_variables.insert(key, remainder.to_string());
+                    }
                 }
                 "aws_sm" => {
                     // Load the value from AWS Secrets Manager
 
                     match amazon.get_secret(remainder).await {
                         Some(value) => {
-                            passed_variables.insert(key, value);
+                            if let Some(prefix) = &application.env_prefix {
+                                if key.starts_with(prefix) {
+                                    passed_variables.insert(key.strip_prefix(prefix).unwrap().to_string(), value);
+                                }
+                                else{
+                                    passed_variables.insert(key, value);
+                                }
+                            } else {
+                                passed_variables.insert(key, value);
+                            }
                         }
                         None => {
                             tracing::warn!(
