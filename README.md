@@ -12,7 +12,7 @@ A command-line tool that loads environment variables from external sources befor
 
 ## Installation
 
-Download the latest binary from the [releases page](https://github.com/your-repo/environment-loader/releases) or build from source with Rust.
+Download the latest binary from the [releases page](https://github.com/Induct-ie/env-loader/releases) or build from source with Rust.
 
 ## Usage
 
