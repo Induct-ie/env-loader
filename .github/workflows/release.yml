@@ -3,14 +3,15 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - 'v*'
 
 env:
   BIN_NAME: envloader
 
 jobs:
   build:
-    name: Build & Upload Binaries
+    name: Build and Release Binaries
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         target:
@@ -19,29 +20,43 @@ jobs:
         include:
           - target: x86_64-unknown-linux-musl
             arch: x86_64
+            linker: musl-gcc
+            packages: musl-tools
           - target: aarch64-unknown-linux-musl
             arch: arm64
-    runs-on: ubuntu-latest
+            linker: aarch64-linux-gnu-gcc
+            packages: gcc-aarch64-linux-gnu
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - name: Install required packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.packages }}
 
-      - name: Install Rust target
+      - name: Add Rust target
         run: rustup target add ${{ matrix.target }}
 
-      - name: Build binary
+      - name: Configure cargo linker
+        run: |
+          mkdir -p .cargo
+          echo '[target.${{ matrix.target }}]' >> .cargo/config.toml
+          echo 'linker = "${{ matrix.linker }}"' >> .cargo/config.toml
+
+      - name: Build release binary
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Rename binary
+      - name: Prepare artifact
         run: |
           mkdir -p dist
           cp target/${{ matrix.target }}/release/${{ env.BIN_NAME }} dist/${{ env.BIN_NAME }}-${{ matrix.arch }}
+          chmod +x dist/${{ env.BIN_NAME }}-${{ matrix.arch }}
 
-      - name: Upload release binaries
+      - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/${{ env.BIN_NAME }}-${{ matrix.arch }}
+          files: |
+            dist/${{ env.BIN_NAME }}-${{ matrix.arch }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
