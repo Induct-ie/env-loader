@@ -189,7 +189,9 @@ async fn main() {
     // Go ahead and call the target application,
 
     let binary = std::ffi::CString::from_str(&application.cmd[0]).unwrap();
-    let args = application.cmd[1..]
+
+    let args = application
+        .cmd
         .iter()
         .map(|s| std::ffi::CString::from_str(s).unwrap())
         .collect::<Vec<_>>();
